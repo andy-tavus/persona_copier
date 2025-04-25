@@ -113,12 +113,12 @@
             <h4>LLM</h4>
             
             <div class="form-group">
-                <label for="llmModel">Model:</label>
+                <label for="llmModel">Model/Model Name:</label>
                 <input type="text" id="llmModel">
             </div>
             
             <div class="form-group">
-                <label for="llmBaseUrl">Base URL:</label>
+                <label for="llmBaseUrl">Base URL/Endpoint:</label>
                 <input type="text" id="llmBaseUrl">
             </div>
             
@@ -329,10 +329,12 @@
             
             // LLM layer
             if (data.layers && data.layers.llm) {
-                document.getElementById('llmModel').value = data.layers.llm.model || '';
-                document.getElementById('llmBaseUrl').value = data.layers.llm.base_url || '';
+                document.getElementById('llmModel').value = data.layers.llm.model || data.layers.llm.model_name || '';
+                document.getElementById('llmBaseUrl').value = data.layers.llm.base_url || data.layers.llm.endpoint || '';
                 document.getElementById('llmApiKey').value = data.layers.llm.api_key || '';
                 document.getElementById('llmTools').value = data.layers.llm.tools ? JSON.stringify(data.layers.llm.tools, null, 2) : '';
+                
+                console.log('LLM layer data:', data.layers.llm);
             }
             
             // TTS layer
@@ -387,7 +389,9 @@
                     layers: {
                         llm: {
                             model: document.getElementById('llmModel').value || undefined,
+                            model_name: document.getElementById('llmModel').value || undefined,
                             base_url: document.getElementById('llmBaseUrl').value || undefined,
+                            endpoint: document.getElementById('llmBaseUrl').value || undefined,
                             api_key: document.getElementById('llmApiKey').value || undefined,
                             tools: parseJsonField('llmTools')
                         },
