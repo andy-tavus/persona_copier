@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persona Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:active {
+            background-color: #3d8b40;
+        }
+        button.loading {
+            background-color: #808080;
+            cursor: not-allowed;
+        }
+        .nested-form {
+            margin-left: 20px;
+            padding: 10px;
+            border-left: 2px solid #ccc;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Persona Manager</h1>
+    
+    <div class="form-group">
+        <label for="apiKey">API Key:</label>
+        <input type="text" id="apiKey" placeholder="Enter your API key">
+    </div>
+    
+    <div class="form-group">
+        <label for="personaId">Persona ID:</label>
+        <input type="text" id="personaId" placeholder="Enter persona ID to fetch">
+        <button onclick="fetchPersona()">Fetch Persona</button>
+        <div id="fetchResult"></div>
+    </div>
+    
+    <div id="personaForm" style="display: none;">
+        <h2>Persona Details</h2>
+        
+        <div class="form-group">
+            <label for="personaName">Persona Name:</label>
+            <input type="text" id="personaName">
+        </div>
+        
+        <div class="form-group">
+            <label for="systemPrompt">System Prompt:</label>
+            <textarea id="systemPrompt"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="context">Context:</label>
+            <textarea id="context"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="defaultReplicaId">Default Replica ID:</label>
+            <input type="text" id="defaultReplicaId">
+        </div>
+        
+        <h3>Layers</h3>
+        
+        <div class="nested-form">
+            <h4>LLM</h4>
+            
+            <div class="form-group">
+                <label for="llmModel">Model:</label>
+                <input type="text" id="llmModel">
+            </div>
+            
+            <div class="form-group">
+                <label for="llmBaseUrl">Base URL:</label>
+                <input type="text" id="llmBaseUrl">
+            </div>
+            
+            <div class="form-group">
+                <label for="llmApiKey">API Key:</label>
+                <input type="text" id="llmApiKey">
+            </div>
+            
+            <div class="form-group">
+                <label for="llmTools">Tools (JSON array):</label>
+                <textarea id="llmTools"></textarea>
+            </div>
+        </div>
+        
+        <div class="nested-form">
+            <h4>TTS</h4>
+            
+            <div class="form-group">
+                <label for="ttsApiKey">API Key:</label>
+                <input type="text" id="ttsApiKey">
+            </div>
+            
+            <div class="form-group">
+                <label for="ttsEngine">TTS Engine:</label>
+                <select id="ttsEngine">
+                    <option value="cartesia">Cartesia</option>
+                    <option value="elevenlabs">ElevenLabs</option>
+                    <option value="playht">PlayHT</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="externalVoiceId">External Voice ID:</label>
+                <input type="text" id="externalVoiceId">
+            </div>
+            
+            <div class="form-group">
+                <label for="voiceSettings">Voice Settings (JSON object):</label>
+                <textarea id="voiceSettings"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="playhtUserId">PlayHT User ID:</label>
+                <input type="text" id="playhtUserId">
+            </div>
+            
+            <div class="form-group">
+                <label for="ttsEmotionControl">TTS Emotion Control:</label>
+                <select id="ttsEmotionControl">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="ttsModelName">TTS Model Name:</label>
+                <input type="text" id="ttsModelName">
+            </div>
+        </div>
+        
+        <div class="nested-form">
+            <h4>Perception</h4>
+            
+            <div class="form-group">
+                <label for="perceptionModel">Perception Model:</label>
+                <select id="perceptionModel">
+                    <option value="raven-0">Raven-0</option>
+                    <option value="basic">Basic</option>
+                    <option value="off">Off</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="ambientAwarenessQueries">Ambient Awareness Queries (JSON array):</label>
+                <textarea id="ambientAwarenessQueries"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="perceptionToolPrompt">Perception Tool Prompt:</label>
+                <textarea id="perceptionToolPrompt"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="perceptionTools">Perception Tools (JSON array):</label>
+                <textarea id="perceptionTools"></textarea>
+            </div>
+        </div>
+        
+        <div class="nested-form">
+            <h4>STT</h4>
+            
+            <div class="form-group">
+                <label for="sttEngine">STT Engine:</label>
+                <select id="sttEngine">
+                    <option value="tavus-turbo">Tavus Turbo</option>
+                    <option value="tavus-advanced">Tavus Advanced</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="participantPauseSensitivity">Participant Pause Sensitivity:</label>
+                <select id="participantPauseSensitivity">
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                    <option value="verylow">Very Low</option>
+                    <option value="superlow">Super Low</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="participantInterruptSensitivity">Participant Interrupt Sensitivity:</label>
+                <select id="participantInterruptSensitivity">
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                    <option value="verylow">Very Low</option>
+                    <option value="superlow">Super Low</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="hotwords">Hotwords:</label>
+                <textarea id="hotwords"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="smartTurnDetection">Smart Turn Detection:</label>
+                <select id="smartTurnDetection">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+        </div>
+        
+        <button onclick="createPersona()">Create New Persona</button>
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        async function fetchPersona() {
+            const apiKey = document.getElementById('apiKey').value;
+            const personaId = document.getElementById('personaId').value;
+            const fetchButton = document.querySelector('button[onclick="fetchPersona()"]');
+            
+            console.log('Fetching persona with:', { apiKey, personaId });
+            
+            if (!apiKey || !personaId) {
+                console.log('Missing required fields');
+                document.getElementById('fetchResult').innerHTML = `
+                    <div class="error">
+                        <p>❌ Please enter both API Key and Persona ID</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                // Disable button and show loading state
+                fetchButton.classList.add('loading');
+                fetchButton.disabled = true;
+                
+                console.log('Making API request...');
+                const response = await fetch(`https://tavusapi.com/v2/personas/${personaId}`, {
+                    method: 'GET',
+                    headers: {
+                        'x-api-key': apiKey,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Received data:', data);
+                populateForm(data);
+                document.getElementById('personaForm').style.display = 'block';
+                document.getElementById('fetchResult').innerHTML = `
+                    <div class="success">
+                        <p>✅ Persona fetched successfully!</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error fetching persona:', error);
+                document.getElementById('fetchResult').innerHTML = `
+                    <div class="error">
+                        <p>❌ Error fetching persona:</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                // Re-enable button and remove loading state
+                fetchButton.classList.remove('loading');
+                fetchButton.disabled = false;
+            }
+        }
+        
+        function populateForm(data) {
+            // Basic fields
+            document.getElementById('personaName').value = data.persona_name || '';
+            document.getElementById('systemPrompt').value = data.system_prompt || '';
+            document.getElementById('context').value = data.context || '';
+            document.getElementById('defaultReplicaId').value = data.default_replica_id || '';
+            
+            // LLM layer
+            if (data.layers && data.layers.llm) {
+                document.getElementById('llmModel').value = data.layers.llm.model || '';
+                document.getElementById('llmBaseUrl').value = data.layers.llm.base_url || '';
+                document.getElementById('llmApiKey').value = data.layers.llm.api_key || '';
+                document.getElementById('llmTools').value = data.layers.llm.tools ? JSON.stringify(data.layers.llm.tools, null, 2) : '';
+            }
+            
+            // TTS layer
+            if (data.layers && data.layers.tts) {
+                document.getElementById('ttsApiKey').value = data.layers.tts.api_key || '';
+                document.getElementById('ttsEngine').value = data.layers.tts.tts_engine || 'cartesia';
+                document.getElementById('externalVoiceId').value = data.layers.tts.external_voice_id || '';
+                document.getElementById('voiceSettings').value = data.layers.tts.voice_settings ? JSON.stringify(data.layers.tts.voice_settings, null, 2) : '';
+                document.getElementById('playhtUserId').value = data.layers.tts.playht_user_id || '';
+                document.getElementById('ttsEmotionControl').value = data.layers.tts.tts_emotion_control?.toString() || 'false';
+                document.getElementById('ttsModelName').value = data.layers.tts.tts_model_name || '';
+            }
+            
+            // Perception layer
+            if (data.layers && data.layers.perception) {
+                document.getElementById('perceptionModel').value = data.layers.perception.perception_model || 'raven-0';
+                document.getElementById('ambientAwarenessQueries').value = data.layers.perception.ambient_awareness_queries ? JSON.stringify(data.layers.perception.ambient_awareness_queries, null, 2) : '';
+                document.getElementById('perceptionToolPrompt').value = data.layers.perception.perception_tool_prompt || '';
+                document.getElementById('perceptionTools').value = data.layers.perception.perception_tools ? JSON.stringify(data.layers.perception.perception_tools, null, 2) : '';
+            }
+            
+            // STT layer
+            if (data.layers && data.layers.stt) {
+                document.getElementById('sttEngine').value = data.layers.stt.stt_engine || 'tavus-advanced';
+                document.getElementById('participantPauseSensitivity').value = data.layers.stt.participant_pause_sensitivity || 'medium';
+                document.getElementById('participantInterruptSensitivity').value = data.layers.stt.participant_interrupt_sensitivity || 'medium';
+                document.getElementById('hotwords').value = data.layers.stt.hotwords || '';
+                document.getElementById('smartTurnDetection').value = data.layers.stt.smart_turn_detection?.toString() || 'true';
+            }
+        }
+        
+        async function createPersona() {
+            const apiKey = document.getElementById('apiKey').value;
+            const createButton = document.querySelector('button[onclick="createPersona()"]');
+            
+            if (!apiKey) {
+                alert('Please enter your API Key');
+                return;
+            }
+            
+            try {
+                // Disable button and show loading state
+                createButton.classList.add('loading');
+                createButton.disabled = true;
+                
+                // Build the request payload
+                const payload = {
+                    persona_name: document.getElementById('personaName').value,
+                    system_prompt: document.getElementById('systemPrompt').value,
+                    context: document.getElementById('context').value,
+                    default_replica_id: document.getElementById('defaultReplicaId').value || undefined,
+                    layers: {
+                        llm: {
+                            model: document.getElementById('llmModel').value || undefined,
+                            base_url: document.getElementById('llmBaseUrl').value || undefined,
+                            api_key: document.getElementById('llmApiKey').value || undefined,
+                            tools: parseJsonField('llmTools')
+                        },
+                        tts: {
+                            api_key: document.getElementById('ttsApiKey').value || undefined,
+                            tts_engine: document.getElementById('ttsEngine').value || undefined,
+                            external_voice_id: document.getElementById('externalVoiceId').value || undefined,
+                            voice_settings: parseJsonField('voiceSettings'),
+                            playht_user_id: document.getElementById('playhtUserId').value || undefined,
+                            tts_emotion_control: document.getElementById('ttsEmotionControl').value === 'true',
+                            tts_model_name: document.getElementById('ttsModelName').value || undefined
+                        },
+                        perception: {
+                            perception_model: document.getElementById('perceptionModel').value || undefined,
+                            ambient_awareness_queries: parseJsonField('ambientAwarenessQueries'),
+                            perception_tool_prompt: document.getElementById('perceptionToolPrompt').value || undefined,
+                            perception_tools: parseJsonField('perceptionTools')
+                        },
+                        stt: {
+                            stt_engine: document.getElementById('sttEngine').value || undefined,
+                            participant_pause_sensitivity: document.getElementById('participantPauseSensitivity').value || undefined,
+                            participant_interrupt_sensitivity: document.getElementById('participantInterruptSensitivity').value || undefined,
+                            hotwords: document.getElementById('hotwords').value || undefined,
+                            smart_turn_detection: document.getElementById('smartTurnDetection').value === 'true'
+                        }
+                    }
+                };
+                
+                // Clean up undefined values
+                const cleanPayload = JSON.parse(JSON.stringify(payload));
+                
+                const response = await fetch('https://tavusapi.com/v2/personas', {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cleanPayload)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Error: ${response.status} - ${errorData.message || response.statusText}`);
+                }
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <div class="success">
+                        <p>✅ Persona created successfully!</p>
+                        <p>New Persona ID: <strong>${data.persona_id}</strong></p>
+                        <p>You can use this ID to fetch the persona details.</p>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+                        <p>❌ Error creating persona:</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                // Re-enable button and remove loading state
+                createButton.classList.remove('loading');
+                createButton.disabled = false;
+            }
+        }
+        
+        function parseJsonField(fieldId) {
+            const value = document.getElementById(fieldId).value.trim();
+            if (!value) return undefined;
+            
+            try {
+                return JSON.parse(value);
+            } catch (e) {
+                console.error(`Error parsing JSON in ${fieldId}:`, e);
+                return undefined;
+            }
+        }
+    </script>
+</body>
+</html>
